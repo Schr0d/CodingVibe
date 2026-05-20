@@ -25,14 +25,16 @@ export async function neteaseCommand(action: NetEaseAction, options: { query?: s
   }
 
   if (action === "play") {
-    const id = options.id ?? (await firstSearchResultId(adapter, options.query, parseLimit(options.limit)));
-    if (!id) throw new Error("--id or --query is required for netease play.");
+    const result = options.id ? await adapter.songUrl(options.id) : await playableFromQuery(adapter, options.query, parseLimit(options.limit));
+    if (!result) throw new Error("--id or --query is required for netease play.");
 
-    const result = await adapter.songUrl(id);
-    if (!result.playable || !result.url) throw new Error(`NetEase song ${id} did not return a playable URL.`);
+    if (!result.playable || !result.url) throw new Error(`NetEase song ${result.id} did not return a playable URL.`);
+    if (result.preview_only) {
+      throw new Error(`NetEase song ${result.id} appears to be preview-only. Try setting NETEASE_COOKIE or choosing another song.`);
+    }
 
     await openUrl(result.url);
-    console.log(`opened netease song ${id}`);
+    console.log(`opened netease song ${result.id}`);
     return;
   }
 
@@ -41,10 +43,9 @@ export async function neteaseCommand(action: NetEaseAction, options: { query?: s
   }
 }
 
-async function firstSearchResultId(adapter: ReturnType<typeof createNetEaseAdapterFromEnv>, query: string | undefined, limit: number): Promise<string | undefined> {
+async function playableFromQuery(adapter: ReturnType<typeof createNetEaseAdapterFromEnv>, query: string | undefined, limit: number) {
   if (!query) return undefined;
-  const results = await adapter.search(query, limit);
-  return results[0]?.id;
+  return adapter.firstPlayableFromSearch(query, limit);
 }
 
 function parseLimit(limit: string | undefined): number {

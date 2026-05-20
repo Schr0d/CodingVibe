@@ -7,6 +7,7 @@ const netease = require("NeteaseCloudMusicApi") as NetEaseApi;
 type NetEaseApi = {
   cloudsearch(params: Record<string, unknown>): Promise<NetEaseResponse>;
   song_url(params: Record<string, unknown>): Promise<NetEaseResponse>;
+  song_url_v1(params: Record<string, unknown>): Promise<NetEaseResponse>;
   recommend_songs(params: Record<string, unknown>): Promise<NetEaseResponse>;
 };
 
@@ -26,7 +27,11 @@ type NetEaseUrl = {
   id: number;
   url: string | null;
   br?: number;
+  level?: string;
   type?: string;
+  time?: number;
+  freeTrialInfo?: unknown;
+  freeTrialPrivilege?: unknown;
 };
 
 export type NetEaseSearchResult = {
@@ -39,8 +44,11 @@ export type NetEaseSearchResult = {
 export type NetEasePlayableUrl = {
   id: string;
   playable: boolean;
+  preview_only: boolean;
+  reason?: string;
   url?: string;
   bitrate?: number;
+  level?: string;
   type?: string;
 };
 
@@ -63,20 +71,43 @@ export class NetEaseAdapter {
     }));
   }
 
-  async songUrl(id: string): Promise<NetEasePlayableUrl> {
-    const response = await netease.song_url({ id, br: 320000, cookie: this.cookie });
+  async songUrl(id: string, level = "standard"): Promise<NetEasePlayableUrl> {
+    const response = await netease.song_url_v1({ id, level, cookie: this.cookie });
     const urls = readUrls(response.body);
     const match = urls.find((item) => String(item.id) === String(id)) ?? urls[0];
 
-    if (!match?.url) return { id, playable: false };
+    if (!match?.url) {
+      const fallback = await this.legacySongUrl(id);
+      if (fallback.playable) return fallback;
+      return { id, playable: false, preview_only: false, reason: "no playable URL returned" };
+    }
 
     return {
       id,
       playable: true,
+      preview_only: isPreviewOnly(match),
+      reason: isPreviewOnly(match) ? "NetEase returned a free-trial or short preview URL" : undefined,
       url: match.url,
       bitrate: match.br,
+      level: match.level,
       type: match.type
     };
+  }
+
+  async firstPlayableFromSearch(keywords: string, limit: number): Promise<NetEasePlayableUrl | undefined> {
+    const results = await this.search(keywords, limit);
+
+    for (const result of results) {
+      const playable = await this.songUrl(result.id);
+      if (playable.playable && !playable.preview_only) return playable;
+    }
+
+    for (const result of results) {
+      const playable = await this.songUrl(result.id);
+      if (playable.playable) return playable;
+    }
+
+    return undefined;
   }
 
   async seed(limit: number): Promise<SafeCandidate[]> {
@@ -99,6 +130,25 @@ export class NetEaseAdapter {
         "personalized_seed"
       )
     );
+  }
+
+  private async legacySongUrl(id: string): Promise<NetEasePlayableUrl> {
+    const response = await netease.song_url({ id, br: 320000, cookie: this.cookie });
+    const urls = readUrls(response.body);
+    const match = urls.find((item) => String(item.id) === String(id)) ?? urls[0];
+
+    if (!match?.url) return { id, playable: false, preview_only: false, reason: "legacy endpoint returned no playable URL" };
+
+    return {
+      id,
+      playable: true,
+      preview_only: isPreviewOnly(match),
+      reason: isPreviewOnly(match) ? "NetEase returned a free-trial or short preview URL" : undefined,
+      url: match.url,
+      bitrate: match.br,
+      level: match.level,
+      type: match.type
+    };
   }
 }
 
@@ -139,6 +189,10 @@ function isSong(value: unknown): value is NetEaseSong {
 
 function isUrl(value: unknown): value is NetEaseUrl {
   return Boolean(value && typeof value === "object" && typeof (value as NetEaseUrl).id === "number" && "url" in value);
+}
+
+function isPreviewOnly(value: NetEaseUrl): boolean {
+  return Boolean(value.freeTrialInfo || value.freeTrialPrivilege || (typeof value.time === "number" && value.time > 0 && value.time <= 35000));
 }
 
 function artistName(song: NetEaseSong): string {

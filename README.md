@@ -267,6 +267,8 @@ Safety boundaries:
 - Without `NETEASE_COOKIE`, `netease seed` falls back to anonymous search seed.
 - With `NETEASE_COOKIE`, `netease seed` can use daily recommendation data through the unofficial API.
 - `netease play` opens the resolved playback URL with the OS default handler. It does not embed a player yet.
+- `netease play --query` probes search results and skips preview-only URLs when possible.
+- If NetEase returns only a 30-second preview, set `NETEASE_COOKIE` or choose another song.
 - This adapter is not a default onboarding path.
 
 Known risks:
