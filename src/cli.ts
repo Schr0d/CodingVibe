@@ -72,11 +72,11 @@ program
 program
   .command("netease")
   .description("Use the experimental NetEase Cloud Music adapter. Unofficial API; no cookies are persisted.")
-  .argument("<action>", "capabilities | search | url | seed")
+  .argument("<action>", "capabilities | search | url | play | seed")
   .option("--query <text>", "search query")
   .option("--id <id>", "song id for url")
   .option("--limit <n>", "result count", "5")
-  .action(async (action: "capabilities" | "search" | "url" | "seed", options: { query?: string; id?: string; limit?: string }) => {
+  .action(async (action: "capabilities" | "search" | "url" | "play" | "seed", options: { query?: string; id?: string; limit?: string }) => {
     await runCommand(() => neteaseCommand(action, options));
   });
 
