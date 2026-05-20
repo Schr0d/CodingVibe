@@ -77,6 +77,7 @@ node dist/cli.js state
 node dist/cli.js explain
 node dist/cli.js validate examples/workflow-state.min.json
 node dist/cli.js mcp
+node dist/cli.js spotify status
 ```
 
 `node dist/cli.js mcp` starts a stdio MCP server with safe local tools:
@@ -174,6 +175,40 @@ Potential future adapters:
 - QQ Music
 
 Non-official adapters should be marked experimental and must declare their capabilities and privacy surface.
+
+## Spotify Adapter
+
+Spotify support is experimental and uses the official `@spotify/web-api-ts-sdk` package.
+
+This first adapter does not implement OAuth. It only accepts an explicit access token through the environment:
+
+```bash
+set SPOTIFY_ACCESS_TOKEN=your_access_token
+node dist/cli.js spotify status
+node dist/cli.js spotify pause
+node dist/cli.js spotify resume
+node dist/cli.js spotify next
+node dist/cli.js spotify seed --limit 5
+```
+
+Optional device selection:
+
+```bash
+set SPOTIFY_DEVICE_ID=your_device_id
+```
+
+Required Spotify scopes depend on the command:
+
+- Playback: `user-read-playback-state`, `user-modify-playback-state`.
+- Personalized seed: `user-top-read`.
+
+Safety boundaries:
+
+- Coding Vibe does not persist Spotify tokens.
+- Coding Vibe does not print tokens.
+- `spotify seed` prints sanitized candidate IDs and coarse audio traits only.
+- `spotify seed` does not print raw track URIs, account identifiers, listening history, playlist names, or provider recommendation responses.
+- OAuth broker, token refresh, and OS keychain storage are future work.
 
 ## Development
 

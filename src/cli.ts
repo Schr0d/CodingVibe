@@ -6,6 +6,7 @@ import { initCommand } from "./commands/init.js";
 import { devCommand } from "./commands/dev.js";
 import { stateCommand } from "./commands/state.js";
 import { explainCommand } from "./commands/explain.js";
+import { spotifyCommand } from "./commands/spotify.js";
 
 const program = new Command();
 
@@ -27,6 +28,15 @@ program
   .description("Start the MCP server.")
   .action(async () => {
     await runCommand(mcpCommand);
+  });
+
+program
+  .command("spotify")
+  .description("Control Spotify with an explicit SPOTIFY_ACCESS_TOKEN. Experimental: no OAuth broker yet.")
+  .argument("<action>", "status | pause | next | resume | seed")
+  .option("--limit <n>", "candidate count for seed", "5")
+  .action(async (action: "status" | "pause" | "next" | "resume" | "seed", options: { limit?: string }) => {
+    await runCommand(() => spotifyCommand(action, options));
   });
 
 program
