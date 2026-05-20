@@ -2,6 +2,10 @@
 import { Command } from "commander";
 import { validateCommand } from "./commands/validate.js";
 import { mcpCommand } from "./commands/mcp.js";
+import { initCommand } from "./commands/init.js";
+import { devCommand } from "./commands/dev.js";
+import { stateCommand } from "./commands/state.js";
+import { explainCommand } from "./commands/explain.js";
 
 const program = new Command();
 
@@ -27,31 +31,31 @@ program
 
 program
   .command("init")
-  .description("Initialize local vibe-sidecar config. Planned for the next implementation slice.")
-  .action(() => {
-    console.log("vibe init is planned for the next implementation slice.");
+  .description("Initialize local vibe-sidecar config.")
+  .action(async () => {
+    await runCommand(initCommand);
   });
 
 program
   .command("dev")
-  .description("Run fake watcher, policy engine, adapter, and compact TUI. Planned for the next implementation slice.")
+  .description("Run fake watcher, policy engine, adapter, and compact TUI.")
   .option("--fake", "use the fake adapter")
-  .action(() => {
-    console.log("vibe dev --fake is planned for the next implementation slice.");
+  .action(async (options: { fake?: boolean }) => {
+    await runCommand(() => devCommand(options));
   });
 
 program
   .command("state")
-  .description("Print current workflow-state summary. Planned for the next implementation slice.")
-  .action(() => {
-    console.log("vibe state is planned for the next implementation slice.");
+  .description("Print current workflow-state summary.")
+  .action(async () => {
+    await runCommand(stateCommand);
   });
 
 program
   .command("explain")
-  .description("Explain latest policy decision. Planned for the next implementation slice.")
-  .action(() => {
-    console.log("vibe explain is planned for the next implementation slice.");
+  .description("Explain latest policy decision.")
+  .action(async () => {
+    await runCommand(explainCommand);
   });
 
 async function runCommand(command: () => Promise<void>): Promise<void> {

@@ -71,18 +71,22 @@ Valid workflow state: examples/workflow-state.min.json
 Current commands:
 
 ```bash
+node dist/cli.js init
+node dist/cli.js dev --fake
+node dist/cli.js state
+node dist/cli.js explain
 node dist/cli.js validate examples/workflow-state.min.json
 node dist/cli.js mcp
 ```
 
-Planned next commands:
+During `dev --fake`:
 
-```bash
-vibe init
-vibe dev --fake
-vibe state
-vibe explain
-```
+- `space`: play/pause fake adapter state.
+- `n`: next candidate.
+- `,`: settings.
+- `e`: explain current policy decision.
+- `s`: print current workflow state JSON.
+- `q`: quit.
 
 ## Core Artifact
 
