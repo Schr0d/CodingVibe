@@ -15,7 +15,15 @@ type DevRuntime = {
   state: WorkflowState;
   decision: PolicyDecision;
   candidate: SafeCandidate;
-  settingsOpen: boolean;
+};
+
+type View = "main" | "settings";
+
+type Settings = {
+  adapter: "fake";
+  volume: "simulated" | "muted";
+  mode: "compact" | "expanded";
+  privacy: "strict" | "inspect";
 };
 
 export async function devCommand(options: DevOptions): Promise<void> {
@@ -29,13 +37,16 @@ export async function devCommand(options: DevOptions): Promise<void> {
   const candidates = await readJson<CandidateFile>(vibePath(CANDIDATES_FILE));
   const adapter = new FakeAdapter(candidates, vibePath(ADAPTER_LOG_FILE));
   let tick = 0;
+  let view: View = "main";
+  let selectedSetting = 0;
+  const settings: Settings = { adapter: "fake", volume: "simulated", mode: "compact", privacy: "strict" };
   let runtime = await updateRuntime(tick, policy, adapter);
-  render(runtime, adapter.isPlaying());
+  render(runtime, adapter.isPlaying(), view, settings, selectedSetting);
 
   const interval = setInterval(async () => {
     tick += 1;
     runtime = await updateRuntime(tick, policy, adapter);
-    render(runtime, adapter.isPlaying());
+    render(runtime, adapter.isPlaying(), view, settings, selectedSetting);
   }, 5000);
 
   process.stdin.setRawMode?.(true);
@@ -50,14 +61,21 @@ export async function devCommand(options: DevOptions): Promise<void> {
       process.exit(0);
     }
 
-    if (key === " ") adapter.togglePlay();
-    if (key === "n") runtime.candidate = adapter.next(runtime.state);
-    if (key === ",") runtime.settingsOpen = !runtime.settingsOpen;
-    if (key === "e") renderExplain(runtime);
-    if (key === "s") renderState(runtime.state);
+    if (key === ",") view = view === "settings" ? "main" : "settings";
+    else if (key === "\u001b") view = "main";
+    else if (view === "settings") {
+      if (key === "\u001b[A" || key === "k") selectedSetting = Math.max(0, selectedSetting - 1);
+      if (key === "\u001b[B" || key === "j") selectedSetting = Math.min(3, selectedSetting + 1);
+      if (key === "\r" || key === " ") toggleSetting(settings, selectedSetting);
+    } else {
+      if (key === " ") adapter.togglePlay();
+      if (key === "n") runtime.candidate = adapter.next(runtime.state);
+      if (key === "e") renderExplain(runtime);
+      if (key === "s") renderState(runtime.state);
+    }
 
     await adapter.logDecision(runtime.state, runtime.decision, runtime.candidate);
-    render(runtime, adapter.isPlaying());
+    render(runtime, adapter.isPlaying(), view, settings, selectedSetting);
   });
 }
 
@@ -68,32 +86,56 @@ async function updateRuntime(tick: number, policy: PolicyFile, adapter: FakeAdap
   await atomicWriteJson(vibePath(STATE_FILE), state);
   await writeJson(vibePath(DECISION_FILE), decision);
   await adapter.logDecision(state, decision, candidate);
-  return { state, decision, candidate, settingsOpen: false };
+  return { state, decision, candidate };
 }
 
-function render(runtime: DevRuntime, playing: boolean): void {
+function render(runtime: DevRuntime, playing: boolean, view: View, settings: Settings, selectedSetting: number): void {
+  if (view === "settings") {
+    renderSettings(settings, selectedSetting);
+    return;
+  }
+
   const state = runtime.state.workflow;
   const playState = playing ? "playing" : "paused";
   const line1 = `${state.mode}  ${state.confidence.toFixed(2)}  ${state.momentum ?? "unknown"}  fake:${playState}`;
   const line2 = `now ${runtime.decision.adapter_action.mood}  ${runtime.candidate.id}`;
   process.stdout.write("\x1Bc");
   process.stdout.write(`┌─ Vibe ─────────────────────────────────┐\n`);
+  process.stdout.write(`│ ${pad("/\\  workflow-state sidecar", 38)} │\n`);
+  process.stdout.write(`│ ${pad("\\/  no oauth · fake adapter", 38)} │\n`);
+  process.stdout.write(`├────────────────────────────────────────┤\n`);
   process.stdout.write(`│ ${pad(line1, 38)} │\n`);
   process.stdout.write(`│ ${pad(line2, 38)} │\n`);
   process.stdout.write(`│ ${pad("space play/pause  n next  , settings", 38)} │\n`);
   process.stdout.write(`└────────────────────────────────────────┘\n`);
-
-  if (runtime.settingsOpen) renderSettings();
 }
 
-function renderSettings(): void {
-  process.stdout.write(`┌─ Settings ───────────────┐\n`);
-  process.stdout.write(`│ adapter   fake           │\n`);
-  process.stdout.write(`│ volume    simulated      │\n`);
-  process.stdout.write(`│ mode      compact        │\n`);
-  process.stdout.write(`│ privacy   strict         │\n`);
-  process.stdout.write(`│ , close                  │\n`);
-  process.stdout.write(`└──────────────────────────┘\n`);
+function renderSettings(settings: Settings, selectedSetting: number): void {
+  const rows = [
+    ["adapter", settings.adapter, "locked"],
+    ["volume", settings.volume, "enter toggle"],
+    ["mode", settings.mode, "enter toggle"],
+    ["privacy", settings.privacy, "enter toggle"]
+  ];
+
+  process.stdout.write("\x1Bc");
+  process.stdout.write(`┌─ Settings ─────────────────────────────┐\n`);
+  process.stdout.write(`│ ${pad("/\\  settings", 38)} │\n`);
+  process.stdout.write(`│ ${pad("\\/  local only", 38)} │\n`);
+  process.stdout.write(`├────────────────────────────────────────┤\n`);
+  for (const [index, row] of rows.entries()) {
+    const cursor = index === selectedSetting ? ">" : " ";
+    process.stdout.write(`│ ${pad(`${cursor} ${row[0]}  ${row[1]}  ${row[2]}`, 38)} │\n`);
+  }
+  process.stdout.write(`│ ${pad("j/k or arrows move  enter toggle", 38)} │\n`);
+  process.stdout.write(`│ ${pad(", or esc returns", 38)} │\n`);
+  process.stdout.write(`└────────────────────────────────────────┘\n`);
+}
+
+function toggleSetting(settings: Settings, selectedSetting: number): void {
+  if (selectedSetting === 1) settings.volume = settings.volume === "simulated" ? "muted" : "simulated";
+  if (selectedSetting === 2) settings.mode = settings.mode === "compact" ? "expanded" : "compact";
+  if (selectedSetting === 3) settings.privacy = settings.privacy === "strict" ? "inspect" : "strict";
 }
 
 function renderExplain(runtime: DevRuntime): void {
