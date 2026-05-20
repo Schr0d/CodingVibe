@@ -7,6 +7,7 @@ import { devCommand } from "./commands/dev.js";
 import { stateCommand } from "./commands/state.js";
 import { explainCommand } from "./commands/explain.js";
 import { spotifyCommand } from "./commands/spotify.js";
+import { neteaseCommand } from "./commands/netease.js";
 
 const program = new Command();
 
@@ -66,6 +67,17 @@ program
   .description("Explain latest policy decision.")
   .action(async () => {
     await runCommand(explainCommand);
+  });
+
+program
+  .command("netease")
+  .description("Use the experimental NetEase Cloud Music adapter. Unofficial API; no cookies are persisted.")
+  .argument("<action>", "capabilities | search | url | seed")
+  .option("--query <text>", "search query")
+  .option("--id <id>", "song id for url")
+  .option("--limit <n>", "result count", "5")
+  .action(async (action: "capabilities" | "search" | "url" | "seed", options: { query?: string; id?: string; limit?: string }) => {
+    await runCommand(() => neteaseCommand(action, options));
   });
 
 async function runCommand(command: () => Promise<void>): Promise<void> {
