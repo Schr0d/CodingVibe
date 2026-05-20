@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { agentVibeGuidance } from "./agent-guidance.js";
 import { explainPolicyText, getWorkflowStateText, listAvailableVibesText, setFakeVibe } from "./tools.js";
 import type { WorkflowMode } from "../types.js";
 
@@ -29,6 +30,19 @@ export async function startMcpServer(): Promise<void> {
     },
     async ({ vibe, reason }) => toolResult(await setFakeVibe(vibe as WorkflowMode, reason))
   );
+
+  server.prompt("coding_vibe_agent_guidance", "Instructions for coding agents to choose workflow vibes safely.", () => ({
+    description: "Use the coding agent's existing model to choose Coding Vibe workflow modes without exposing private context.",
+    messages: [
+      {
+        role: "user" as const,
+        content: {
+          type: "text" as const,
+          text: agentVibeGuidance
+        }
+      }
+    ]
+  }));
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
