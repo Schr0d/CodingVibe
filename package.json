@@ -1,11 +1,11 @@
 {
-  "name": "vibe-sidecar",
+  "name": "coding-vibe",
   "version": "0.0.0",
   "description": "Local inspectable workflow-state sidecar for coding agents.",
   "type": "module",
   "bin": {
     "vibe": "./dist/cli.js",
-    "vibe-sidecar": "./dist/cli.js"
+    "coding-vibe": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -22,9 +22,11 @@
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",

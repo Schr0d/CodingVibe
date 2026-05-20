@@ -1,10 +1,10 @@
-# Vibe Sidecar
+# Coding Vibe
 
-![Vibe Sidecar logo](assets/logo.svg)
+![Coding Vibe logo](assets/logo.svg)
 
 Local, inspectable workflow-state sidecar for coding agents.
 
-Vibe Sidecar watches safe development signals, reduces them into an auditable workflow-state document, and maps that state to ambient work intent. Music is an adapter, not the core product.
+Coding Vibe watches safe development signals, reduces them into an auditable workflow-state document, and maps that state to ambient work intent. Music is an adapter, not the core product.
 
 V1 is CLI-first and fake-adapter only. It does not connect to real music providers, OAuth, cloud services, or LLMs.
 
@@ -12,7 +12,7 @@ V1 is CLI-first and fake-adapter only. It does not connect to real music provide
 
 Agent-heavy developers lose situational awareness during long coding loops: tests run in the background, CI finishes unnoticed, agents stall, docs mode gets interrupted, and debugging or refactor phases blur together.
 
-Vibe Sidecar tests whether a local, inspectable workflow-state sidecar can make those phases visible without reading source code, prompts, raw logs, OAuth tokens, or account data.
+Coding Vibe tests whether a local, inspectable workflow-state sidecar can make those phases visible without reading source code, prompts, raw logs, OAuth tokens, or account data.
 
 ## What V1 Does
 
@@ -51,7 +51,7 @@ compact terminal UI / logs
 
 The trust boundary is the product: all adapter actions should be explainable from the local workflow-state file and policy result.
 
-![Vibe Sidecar compact terminal UI](assets/product-shot.svg)
+![Coding Vibe compact terminal UI](assets/product-shot.svg)
 
 ## Quick Start
 
@@ -79,6 +79,15 @@ node dist/cli.js validate examples/workflow-state.min.json
 node dist/cli.js mcp
 ```
 
+`node dist/cli.js mcp` starts a stdio MCP server with safe local tools:
+
+- `get_workflow_state`: read the current safe workflow-state summary.
+- `explain_policy`: explain the latest local policy decision.
+- `list_available_vibes`: list supported fake workflow modes.
+- `set_fake_vibe`: write a local fake vibe and policy decision.
+
+The MCP server does not expose provider APIs, OAuth tokens, raw source code, raw logs, browser data, or arbitrary shell access.
+
 During `dev --fake`:
 
 - `space`: play/pause fake adapter state.
@@ -97,7 +106,7 @@ Minimal state:
 ```json
 {
   "schema_version": "1.0.0",
-  "producer": "vibe-sidecar",
+  "producer": "coding-vibe",
   "generated_at": "2026-05-20T00:00:00.000Z",
   "ttl_ms": 30000,
   "workflow": {

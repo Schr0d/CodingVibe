@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vibe-sidecar.local/schemas/workflow-state.schema.json",
+  "$id": "https://coding-vibe.local/schemas/workflow-state.schema.json",
   "title": "Workflow State",
   "type": "object",
   "additionalProperties": true,

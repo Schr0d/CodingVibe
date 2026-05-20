@@ -41,7 +41,7 @@ const modes: Array<WorkflowState["workflow"]> = [
 export function createFakeState(index: number, now = new Date()): WorkflowState {
   return {
     schema_version: "1.0.0",
-    producer: "vibe-sidecar",
+    producer: "coding-vibe",
     generated_at: now.toISOString(),
     ttl_ms: 30000,
     workflow: modes[index % modes.length],
