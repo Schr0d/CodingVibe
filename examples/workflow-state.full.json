@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "producer": "vibe-sidecar",
+  "generated_at": "2026-05-20T00:00:00.000Z",
+  "ttl_ms": 30000,
+  "workflow": {
+    "mode": "debugging",
+    "phase": "test_failed",
+    "momentum": "blocked",
+    "confidence": 0.78,
+    "signals": [
+      "pytest failed twice",
+      "same file edited repeatedly",
+      "no commits in 45min"
+    ]
+  },
+  "safety": {
+    "redactions_applied": ["absolute_path"],
+    "forbidden_fields_seen": true
+  }
+}

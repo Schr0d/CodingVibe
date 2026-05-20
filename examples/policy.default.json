@@ -1,0 +1,22 @@
+{
+  "rules": [
+    {
+      "id": "debugging-caution",
+      "when": { "workflow.mode": "debugging" },
+      "then": { "kind": "fake_music_state", "mood": "low_distraction" },
+      "reason": "Debugging should reduce distraction and keep rhythm steady."
+    },
+    {
+      "id": "waiting-ci",
+      "when": { "workflow.mode": "waiting_ci" },
+      "then": { "kind": "fake_music_state", "mood": "ambient_idle" },
+      "reason": "CI wait state can be lower-attention ambient time."
+    },
+    {
+      "id": "fallback",
+      "when": { "always": true },
+      "then": { "kind": "fake_music_state", "mood": "neutral_focus" },
+      "reason": "Fallback when no workflow-specific rule matches."
+    }
+  ]
+}

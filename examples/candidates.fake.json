@@ -1,0 +1,26 @@
+{
+  "candidates": [
+    {
+      "id": "local-ambient-01",
+      "labels": ["instrumental", "low_energy", "debugging"],
+      "traits": {
+        "energy": "low",
+        "tempo": "slow",
+        "vocals": "none",
+        "familiarity": "familiar"
+      },
+      "source": "fake"
+    },
+    {
+      "id": "local-ambient-02",
+      "labels": ["no_vocals", "steady", "deep_work"],
+      "traits": {
+        "energy": "medium",
+        "tempo": "medium",
+        "vocals": "none",
+        "familiarity": "new"
+      },
+      "source": "fake"
+    }
+  ]
+}

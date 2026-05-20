@@ -1,0 +1,38 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Vibe Sidecar product shot</title>
+  <desc id="desc">A compact terminal widget showing coding workflow state and fake music controls.</desc>
+  <rect width="1200" height="720" fill="#070A0F"/>
+  <rect x="72" y="64" width="1056" height="592" rx="28" fill="#0B1018" stroke="#203047" stroke-width="2"/>
+  <rect x="112" y="104" width="976" height="72" rx="14" fill="#101A2A" stroke="#243750"/>
+  <circle cx="146" cy="140" r="8" fill="#D32F2F"/>
+  <circle cx="174" cy="140" r="8" fill="#F5A623"/>
+  <circle cx="202" cy="140" r="8" fill="#00C853"/>
+  <text x="240" y="148" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">vibe dev --fake</text>
+
+  <rect x="184" y="228" width="832" height="264" rx="18" fill="#08111D" stroke="#2A3A52" stroke-width="2"/>
+  <text x="224" y="278" fill="#F2F7FF" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700">Vibe</text>
+  <rect x="872" y="246" width="104" height="40" rx="20" fill="#062A2E" stroke="#00C8D4"/>
+  <text x="894" y="273" fill="#00C8D4" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">fake</text>
+
+  <text x="224" y="338" fill="#00C8D4" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">debugging</text>
+  <text x="392" y="338" fill="#F2F7FF" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">0.78</text>
+  <text x="482" y="338" fill="#F5A623" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">blocked</text>
+  <text x="612" y="338" fill="#00C853" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">fake:ready</text>
+
+  <text x="224" y="392" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">now</text>
+  <text x="286" y="392" fill="#F2F7FF" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">low-vocal steady</text>
+  <text x="570" y="392" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">local-ambient-02</text>
+
+  <rect x="224" y="428" width="752" height="1" fill="#203047"/>
+  <text x="224" y="462" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">space play/pause</text>
+  <text x="438" y="462" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">n next</text>
+  <text x="550" y="462" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">, settings</text>
+  <text x="704" y="462" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">e explain</text>
+
+  <rect x="706" y="506" width="270" height="118" rx="14" fill="#101A2A" stroke="#2A3A52"/>
+  <text x="732" y="538" fill="#F2F7FF" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700">Settings</text>
+  <text x="732" y="570" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">adapter   fake</text>
+  <text x="732" y="596" fill="#7F93AD" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">privacy   strict</text>
+
+  <text x="112" y="610" fill="#4F627A" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">workflow-state.json -> policy -> fake adapter, no OAuth, no raw code, no provider API</text>
+</svg>
