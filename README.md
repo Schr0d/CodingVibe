@@ -88,6 +88,32 @@ node dist/cli.js mcp
 
 The MCP server does not expose provider APIs, OAuth tokens, raw source code, raw logs, browser data, or arbitrary shell access.
 
+It also exposes the `coding_vibe_agent_guidance` prompt. Use it to tell a coding agent when to call `set_fake_vibe` with its existing large model, without running a second model inside Coding Vibe.
+
+Example MCP config:
+
+```json
+{
+  "mcpServers": {
+    "coding-vibe": {
+      "command": "node",
+      "args": ["C:/Users/T480/Documents/CodingVibe/dist/cli.js", "mcp"]
+    }
+  }
+}
+```
+
+Agent behavior policy:
+
+- Call `set_fake_vibe` when the work phase changes.
+- Use `debugging` for repeated errors or failing tests.
+- Use `writing` for docs, README, changelog, or prose-heavy work.
+- Use `waiting_ci` while tests/builds/CI are running.
+- Use `deep_work` for focused implementation or refactors.
+- Use `reviewing` for code review or audit work.
+- Keep `reason` short and derived.
+- Never include code, raw logs, stack traces, paths, secrets, URLs, tokens, or account data in `reason`.
+
 During `dev --fake`:
 
 - `space`: play/pause fake adapter state.
