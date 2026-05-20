@@ -94,8 +94,8 @@ Use `npm` metadata and keep the package runnable through `npx`.
 Local development can use `pnpm` if desired, but published UX should be:
 
 ```bash
-npx vibe-sidecar init
-npx vibe-sidecar dev --fake
+npx coding-vibe init
+npx coding-vibe dev --fake
 ```
 
 ### CLI Framework
@@ -227,7 +227,7 @@ type WorkflowMode =
 
 type WorkflowState = {
   schema_version: "1.0.0";
-  producer: "vibe-sidecar";
+  producer: "coding-vibe";
   generated_at: string;
   ttl_ms: number;
   workflow: {
@@ -470,7 +470,7 @@ That is enough. Anything more belongs after V1 validation.
 
 ## Open Questions
 
-- Final package name: `vibe-sidecar`, `ambient-agent`, or something else.
+- Final package name: `coding-vibe`.
 - Whether `local` adapter should ship in V1 or wait until fake loop is proven.
 - Whether to use `ink` after plain terminal prototype.
 - Whether to initialize a git repo before implementation.

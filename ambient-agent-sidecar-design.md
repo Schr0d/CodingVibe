@@ -147,7 +147,7 @@ Required top-level fields:
 ```json
 {
   "schema_version": "1.0.0",
-  "producer": "vibe-sidecar",
+  "producer": "coding-vibe",
   "generated_at": "2026-05-20T00:00:00Z",
   "ttl_ms": 30000,
   "workflow": {
@@ -438,10 +438,10 @@ V1 ships as a single developer-facing package with CLI and MCP entrypoints.
 Primary onboarding path:
 
 ```bash
-npx vibe-sidecar init
-npx vibe-sidecar dev --fake
-npx vibe-sidecar state
-npx vibe-sidecar explain
+npx coding-vibe init
+npx coding-vibe dev --fake
+npx coding-vibe state
+npx coding-vibe explain
 ```
 
 Package contents:

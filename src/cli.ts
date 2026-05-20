@@ -31,7 +31,7 @@ program
 
 program
   .command("init")
-  .description("Initialize local vibe-sidecar config.")
+  .description("Initialize local Coding Vibe config.")
   .action(async () => {
     await runCommand(initCommand);
   });

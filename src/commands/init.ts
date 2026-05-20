@@ -10,7 +10,7 @@ export async function initCommand(): Promise<void> {
   await writeJson(vibePath(POLICY_FILE), policy);
   await writeJson(vibePath(CANDIDATES_FILE), candidates);
   await writeJson(vibePath(STATE_FILE), { ...minState, generated_at: new Date().toISOString() });
-  await writeFile(vibePath("README.txt"), "Vibe Sidecar local state. This directory is gitignored by default.\n", "utf8");
+  await writeFile(vibePath("README.txt"), "Coding Vibe local state. This directory is gitignored by default.\n", "utf8");
 
   console.log(`Initialized ${VIBE_DIR}/`);
   console.log(`- ${POLICY_FILE}`);

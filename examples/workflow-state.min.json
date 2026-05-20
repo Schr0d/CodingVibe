@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "producer": "vibe-sidecar",
+  "producer": "coding-vibe",
   "generated_at": "2026-05-20T00:00:00.000Z",
   "ttl_ms": 30000,
   "workflow": {
