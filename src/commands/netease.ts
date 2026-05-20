@@ -33,7 +33,7 @@ export async function neteaseCommand(action: NetEaseAction, options: { query?: s
 
     if (!result.playable || !result.url) throw new Error(`NetEase song ${result.id} did not return a playable URL.`);
     if (result.preview_only) {
-      throw new Error(`NetEase song ${result.id} appears to be preview-only. Try setting NETEASE_COOKIE or choosing another song.`);
+      throw new Error(`NetEase song ${result.id} appears to be preview-only. Try netease login-qr or choose another song.`);
     }
 
     await openUrl(result.url);
@@ -50,7 +50,7 @@ export async function neteaseCommand(action: NetEaseAction, options: { query?: s
     const cookie = await waitForQrCookie(adapter, qr.key);
     await writeCookie(cookie);
     console.log("NetEase login saved to .vibe/auth/netease-cookie.txt");
-    console.log("Cookie value was not printed. Restart commands will use it after you export NETEASE_COOKIE or after auth-store integration lands.");
+    console.log("Cookie value was not printed. Future NetEase commands will use it automatically.");
     return;
   }
 

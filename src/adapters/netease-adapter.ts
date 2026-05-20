@@ -1,4 +1,6 @@
 import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { vibePath } from "../paths.js";
 import type { SafeCandidate } from "../types.js";
 
 const require = createRequire(import.meta.url);
@@ -172,7 +174,16 @@ export class NetEaseAdapter {
 }
 
 export function createNetEaseAdapterFromEnv(): NetEaseAdapter {
-  return new NetEaseAdapter(process.env.NETEASE_COOKIE);
+  return new NetEaseAdapter(process.env.NETEASE_COOKIE ?? readStoredCookie());
+}
+
+function readStoredCookie(): string | undefined {
+  try {
+    const cookie = readFileSync(vibePath("auth", "netease-cookie.txt"), "utf8").trim();
+    return cookie.length > 0 ? cookie : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function toCandidate(result: NetEaseSearchResult, index: number, seedType: "search_seed" | "personalized_seed"): SafeCandidate {
