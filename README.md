@@ -78,6 +78,7 @@ node dist/cli.js explain
 node dist/cli.js validate examples/workflow-state.min.json
 node dist/cli.js mcp
 node dist/cli.js spotify status
+node dist/cli.js netease capabilities
 ```
 
 `node dist/cli.js mcp` starts a stdio MCP server with safe local tools:
@@ -235,6 +236,41 @@ Safety boundaries:
 - `spotify seed` prints sanitized candidate IDs and coarse audio traits only.
 - `spotify seed` does not print raw track URIs, account identifiers, listening history, playlist names, or provider recommendation responses.
 - OAuth broker, token refresh, and OS keychain storage are future work.
+
+## NetEase Cloud Music Adapter
+
+NetEase support is experimental and uses the unofficial `NeteaseCloudMusicApi` package.
+
+Commands:
+
+```bash
+node dist/cli.js netease capabilities
+node dist/cli.js netease search --query "ambient focus" --limit 5
+node dist/cli.js netease url --id 123456
+node dist/cli.js netease seed --limit 5
+```
+
+Optional login cookie:
+
+```bash
+set NETEASE_COOKIE=your_cookie
+node dist/cli.js netease seed --limit 5
+```
+
+Safety boundaries:
+
+- Coding Vibe does not persist NetEase cookies.
+- Coding Vibe does not print cookies.
+- `netease seed` emits safe candidate IDs and coarse traits only.
+- Without `NETEASE_COOKIE`, `netease seed` falls back to anonymous search seed.
+- With `NETEASE_COOKIE`, `netease seed` can use daily recommendation data through the unofficial API.
+- This adapter is not a default onboarding path.
+
+Known risks:
+
+- The NetEase integration is unofficial and may break or be rate-limited.
+- Login, cookies, playback URLs, and availability can be affected by account state, region, copyright, and platform risk controls.
+- The package currently introduces npm audit findings; keep it isolated as experimental provider work.
 
 ## Development
 
