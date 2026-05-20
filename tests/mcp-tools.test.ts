@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import policy from "../examples/policy.default.json" with { type: "json" };
 import state from "../examples/workflow-state.full.json" with { type: "json" };
-import { explainPolicyText, getWorkflowStateText, listAvailableVibesText, setFakeVibe } from "../src/mcp/tools.js";
+import { explainPolicyText, getWorkflowStateText, listAvailableVibesText, setVibe } from "../src/mcp/tools.js";
 import { agentVibeGuidance } from "../src/mcp/agent-guidance.js";
 
 let originalCwd: string;
@@ -38,8 +38,8 @@ describe("MCP safe tools", () => {
     expect(text).toContain("signals:");
   });
 
-  it("sets a fake vibe and writes a policy decision", async () => {
-    const text = await setFakeVibe("waiting_ci", "CI is running");
+  it("sets a vibe and writes a policy decision", async () => {
+    const text = await setVibe("waiting_ci", "CI is running");
     const explanation = await explainPolicyText();
 
     expect(text).toContain("set vibe=waiting_ci");
@@ -47,7 +47,7 @@ describe("MCP safe tools", () => {
   });
 
   it("documents safe agent vibe selection", () => {
-    expect(agentVibeGuidance).toContain("Call set_fake_vibe");
+    expect(agentVibeGuidance).toContain("Call set_vibe");
     expect(agentVibeGuidance).toContain("Do not include source code");
     expect(agentVibeGuidance).toContain("debugging");
   });

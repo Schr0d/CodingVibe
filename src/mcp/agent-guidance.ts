@@ -1,8 +1,8 @@
 export const agentVibeGuidance = `You are connected to Coding Vibe, a local ambient workflow-state sidecar.
 
-Use Coding Vibe when the work phase changes. Prefer calling set_fake_vibe over explaining the vibe in chat.
+Use Coding Vibe when the work phase changes. Prefer calling set_vibe over explaining the vibe in chat.
 
-Call set_fake_vibe with:
+Call set_vibe with:
 - planning: reading requirements, making a plan, deciding scope.
 - debugging: repeated errors, failing tests, investigating a bug.
 - waiting_ci: tests, builds, installs, or CI are running and you are waiting.
