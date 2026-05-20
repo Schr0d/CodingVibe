@@ -266,6 +266,7 @@ Safety boundaries:
 - Coding Vibe only persists NetEase cookies after explicit `netease login-qr`.
 - `NETEASE_COOKIE` takes precedence over the local QR login cookie.
 - `netease login-qr` saves the NetEase cookie to `.vibe/auth/netease-cookie.txt` with restrictive file permissions where supported.
+- `netease login-qr` also writes a temporary local QR page at `.vibe/auth/netease-login.html` so the NetEase app has an actual QR code to scan.
 - `netease seed` emits safe candidate IDs and coarse traits only.
 - Without `NETEASE_COOKIE`, `netease seed` falls back to anonymous search seed.
 - With `NETEASE_COOKIE`, `netease seed` can use daily recommendation data through the unofficial API.

@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { createNetEaseAdapterFromEnv } from "../adapters/netease-adapter.js";
+import { openPath } from "../player/open-path.js";
 import { openUrl } from "../player/open-url.js";
 import { vibePath } from "../paths.js";
 
@@ -43,9 +44,10 @@ export async function neteaseCommand(action: NetEaseAction, options: { query?: s
 
   if (action === "login-qr") {
     const qr = await adapter.createQrLogin();
-    console.log("Open this URL or scan it with the NetEase Cloud Music app:");
+    const qrPagePath = await writeQrPage(qr);
+    console.log("Scan the opened QR code with the NetEase Cloud Music app:");
     console.log(qr.url);
-    await openUrl(qr.url);
+    await openPath(qrPagePath);
 
     const cookie = await waitForQrCookie(adapter, qr.key);
     await writeCookie(cookie);
@@ -78,6 +80,37 @@ async function writeCookie(cookie: string): Promise<void> {
   const path = vibePath("auth", "netease-cookie.txt");
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, cookie, { encoding: "utf8", mode: 0o600 });
+}
+
+async function writeQrPage(qr: { url: string; imageDataUrl?: string }): Promise<string> {
+  const path = vibePath("auth", "netease-login.html");
+  const image = qr.imageDataUrl ? `<img alt="NetEase login QR" src="${escapeHtml(qr.imageDataUrl)}" />` : `<p>QR image was not returned. Use this URL with a QR generator:</p>`;
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>NetEase Login QR</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 32px; background: #111; color: #eee; }
+    img { width: 280px; height: 280px; background: #fff; padding: 16px; }
+    code { display: block; margin-top: 16px; overflow-wrap: anywhere; color: #9ee; }
+  </style>
+</head>
+<body>
+  <h1>NetEase Login QR</h1>
+  <p>Scan this with the NetEase Cloud Music app, then confirm login on your phone.</p>
+  ${image}
+  <code>${escapeHtml(qr.url)}</code>
+</body>
+</html>
+`;
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, html, { encoding: "utf8", mode: 0o600 });
+  return path;
+}
+
+function escapeHtml(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 async function playableFromQuery(adapter: ReturnType<typeof createNetEaseAdapterFromEnv>, query: string | undefined, limit: number) {

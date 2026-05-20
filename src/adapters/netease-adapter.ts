@@ -138,19 +138,19 @@ export class NetEaseAdapter {
   }
 
   async createQrLogin(): Promise<{ key: string; url: string; imageDataUrl?: string }> {
-    const keyResponse = await netease.login_qr_key({});
+    const keyResponse = await netease.login_qr_key({ timestamp: Date.now() });
     const key = readQrKey(keyResponse.body);
-    const qrResponse = await netease.login_qr_create({ key, qrimg: true });
+    const qrResponse = await netease.login_qr_create({ key, platform: "web", qrimg: true, timestamp: Date.now() });
     const data = readQrCreateData(qrResponse.body);
     return { key, url: data.qrurl, imageDataUrl: data.qrimg };
   }
 
   async checkQrLogin(key: string): Promise<{ code?: number; message?: string; cookie?: string }> {
-    const response = await netease.login_qr_check({ key });
-    const code = typeof response.body.code === "number" ? response.body.code : undefined;
-    const message = typeof response.body.message === "string" ? response.body.message : undefined;
-    const cookie = typeof response.body.cookie === "string" ? response.body.cookie : undefined;
-    return { code, message, cookie };
+    const response = await netease.login_qr_check({ key, timestamp: Date.now() });
+    const parsed = readQrCheck(response.body);
+    if (parsed.code !== 502) return parsed;
+
+    return readQrCheck((await netease.login_qr_check({ key, noCookie: true, timestamp: Date.now() })).body);
   }
 
   private async legacySongUrl(id: string): Promise<NetEasePlayableUrl> {
@@ -184,6 +184,13 @@ function readStoredCookie(): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function readQrCheck(body: Record<string, unknown>): { code?: number; message?: string; cookie?: string } {
+  const code = typeof body.code === "number" ? body.code : undefined;
+  const message = typeof body.message === "string" ? body.message : undefined;
+  const cookie = typeof body.cookie === "string" ? body.cookie : undefined;
+  return { code, message, cookie };
 }
 
 function toCandidate(result: NetEaseSearchResult, index: number, seedType: "search_seed" | "personalized_seed"): SafeCandidate {
