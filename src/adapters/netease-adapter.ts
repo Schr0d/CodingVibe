@@ -6,6 +6,9 @@ const netease = require("NeteaseCloudMusicApi") as NetEaseApi;
 
 type NetEaseApi = {
   cloudsearch(params: Record<string, unknown>): Promise<NetEaseResponse>;
+  login_qr_check(params: Record<string, unknown>): Promise<NetEaseResponse>;
+  login_qr_create(params: Record<string, unknown>): Promise<NetEaseResponse>;
+  login_qr_key(params: Record<string, unknown>): Promise<NetEaseResponse>;
   song_url(params: Record<string, unknown>): Promise<NetEaseResponse>;
   song_url_v1(params: Record<string, unknown>): Promise<NetEaseResponse>;
   recommend_songs(params: Record<string, unknown>): Promise<NetEaseResponse>;
@@ -132,6 +135,22 @@ export class NetEaseAdapter {
     );
   }
 
+  async createQrLogin(): Promise<{ key: string; url: string; imageDataUrl?: string }> {
+    const keyResponse = await netease.login_qr_key({});
+    const key = readQrKey(keyResponse.body);
+    const qrResponse = await netease.login_qr_create({ key, qrimg: true });
+    const data = readQrCreateData(qrResponse.body);
+    return { key, url: data.qrurl, imageDataUrl: data.qrimg };
+  }
+
+  async checkQrLogin(key: string): Promise<{ code?: number; message?: string; cookie?: string }> {
+    const response = await netease.login_qr_check({ key });
+    const code = typeof response.body.code === "number" ? response.body.code : undefined;
+    const message = typeof response.body.message === "string" ? response.body.message : undefined;
+    const cookie = typeof response.body.cookie === "string" ? response.body.cookie : undefined;
+    return { code, message, cookie };
+  }
+
   private async legacySongUrl(id: string): Promise<NetEasePlayableUrl> {
     const response = await netease.song_url({ id, br: 320000, cookie: this.cookie });
     const urls = readUrls(response.body);
@@ -198,4 +217,24 @@ function isPreviewOnly(value: NetEaseUrl): boolean {
 function artistName(song: NetEaseSong): string {
   const artists = song.ar ?? song.artists ?? [];
   return artists.map((artist) => artist.name).filter(Boolean).join("/") || "unknown";
+}
+
+function readQrKey(body: Record<string, unknown>): string {
+  const data = body.data;
+  if (data && typeof data === "object" && typeof (data as Record<string, unknown>).unikey === "string") {
+    return (data as Record<string, string>).unikey;
+  }
+  throw new Error("NetEase QR login did not return a unikey.");
+}
+
+function readQrCreateData(body: Record<string, unknown>): { qrurl: string; qrimg?: string } {
+  const data = body.data;
+  if (data && typeof data === "object" && typeof (data as Record<string, unknown>).qrurl === "string") {
+    const record = data as Record<string, unknown>;
+    return {
+      qrurl: String(record.qrurl),
+      qrimg: typeof record.qrimg === "string" ? record.qrimg : undefined
+    };
+  }
+  throw new Error("NetEase QR login did not return a QR URL.");
 }

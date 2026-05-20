@@ -250,6 +250,7 @@ node dist/cli.js netease url --id 123456
 node dist/cli.js netease play --id 123456
 node dist/cli.js netease play --query "ambient focus"
 node dist/cli.js netease seed --limit 5
+node dist/cli.js netease login-qr
 ```
 
 Optional login cookie:
@@ -263,6 +264,7 @@ Safety boundaries:
 
 - Coding Vibe does not persist NetEase cookies.
 - Coding Vibe does not print cookies.
+- `netease login-qr` saves the NetEase cookie to `.vibe/auth/netease-cookie.txt` with restrictive file permissions where supported.
 - `netease seed` emits safe candidate IDs and coarse traits only.
 - Without `NETEASE_COOKIE`, `netease seed` falls back to anonymous search seed.
 - With `NETEASE_COOKIE`, `netease seed` can use daily recommendation data through the unofficial API.
