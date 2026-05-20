@@ -86,11 +86,11 @@ node dist/cli.js netease capabilities
 - `get_workflow_state`: read the current safe workflow-state summary.
 - `explain_policy`: explain the latest local policy decision.
 - `list_available_vibes`: list supported fake workflow modes.
-- `set_fake_vibe`: write a local fake vibe and policy decision.
+- `set_vibe`: write a local safe vibe and policy decision.
 
 The MCP server does not expose provider APIs, OAuth tokens, raw source code, raw logs, browser data, or arbitrary shell access.
 
-It also exposes the `coding_vibe_agent_guidance` prompt. Use it to tell a coding agent when to call `set_fake_vibe` with its existing large model, without running a second model inside Coding Vibe.
+It also exposes the `coding_vibe_agent_guidance` prompt. Use it to tell a coding agent when to call `set_vibe` with its existing large model, without running a second model inside Coding Vibe.
 
 Example MCP config:
 
@@ -107,7 +107,7 @@ Example MCP config:
 
 Agent behavior policy:
 
-- Call `set_fake_vibe` when the work phase changes.
+- Call `set_vibe` when the work phase changes.
 - Use `debugging` for repeated errors or failing tests.
 - Use `writing` for docs, README, changelog, or prose-heavy work.
 - Use `waiting_ci` while tests/builds/CI are running.
@@ -189,6 +189,15 @@ The first UI only needs current workflow state, current fake/local candidate, co
 ## Provider Plugins
 
 Provider integrations are future plugin/SPI work. Core owns the workflow-state schema, privacy rules, policy engine, and adapter contract. Provider-specific adapters should live outside core unless they are fake or local reference implementations.
+
+The provider SPI is split into two contracts:
+
+- `MusicProvider`: declares capabilities, privacy surface, and safe candidate seed/resolve behavior.
+- `PlaybackController`: plays a resolved `Playable`, such as a URL, provider reference, or fake candidate.
+
+This keeps provider data access separate from playback control. NetEase can produce URL playables, Spotify can produce provider references and playback controls, and fake/local adapters can stay entirely local.
+
+The package includes a tiny `url-open` playback controller. It opens non-preview `http`/`https` playables with the OS default handler. It is intentionally minimal: no embedded decoder, no provider credentials, no playlist management, and no pause/next control. Stronger controllers such as VLC, MPD, or a native mini-player should plug into the same `PlaybackController` contract later.
 
 Potential future adapters:
 
