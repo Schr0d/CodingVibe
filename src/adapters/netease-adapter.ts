@@ -19,6 +19,7 @@ type NetEaseApi = {
 type NetEaseResponse = {
   status: number;
   body: Record<string, unknown>;
+  cookie?: string[];
 };
 
 type NetEaseSong = {
@@ -147,10 +148,13 @@ export class NetEaseAdapter {
 
   async checkQrLogin(key: string): Promise<{ code?: number; message?: string; cookie?: string }> {
     const response = await netease.login_qr_check({ key, timestamp: Date.now() });
-    const parsed = readQrCheck(response.body);
+    const rawCookies = Array.isArray(response.cookie) ? response.cookie : [];
+    const parsed = readQrCheck(response.body, rawCookies);
     if (parsed.code !== 502) return parsed;
 
-    return readQrCheck((await netease.login_qr_check({ key, noCookie: true, timestamp: Date.now() })).body);
+    const retry = await netease.login_qr_check({ key, noCookie: true, timestamp: Date.now() });
+    const rawCookies2 = Array.isArray(retry.cookie) ? retry.cookie : [];
+    return readQrCheck(retry.body, rawCookies2);
   }
 
   private async legacySongUrl(id: string): Promise<NetEasePlayableUrl> {
@@ -186,10 +190,15 @@ function readStoredCookie(): string | undefined {
   }
 }
 
-function readQrCheck(body: Record<string, unknown>): { code?: number; message?: string; cookie?: string } {
+function readQrCheck(body: Record<string, unknown>, rawCookies: string[]): { code?: number; message?: string; cookie?: string } {
   const code = typeof body.code === "number" ? body.code : undefined;
   const message = typeof body.message === "string" ? body.message : undefined;
-  const cookie = typeof body.cookie === "string" ? body.cookie : undefined;
+  const bodyCookie = typeof body.cookie === "string" && body.cookie.length > 0 ? body.cookie : undefined;
+  const headerCookie = rawCookies.length > 0 ? rawCookies.join(";") : undefined;
+  const cookie = bodyCookie ?? headerCookie;
+  if (!cookie && code === 803) {
+    console.error("[netease qr-debug] code=803 but no cookie found. body keys:", Object.keys(body).join(", "), "rawCookies length:", rawCookies.length);
+  }
   return { code, message, cookie };
 }
 
