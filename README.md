@@ -196,6 +196,15 @@ The first UI only needs current workflow state, current fake/local candidate, co
 
 Provider integrations are experimental adapter work. Core owns the workflow-state schema, privacy rules, policy engine, and adapter contract. Provider-specific adapters should remain isolated unless they are fake or local reference implementations.
 
+The provider SPI is split into two contracts:
+
+- `MusicProvider`: declares capabilities, privacy surface, and safe candidate seed/resolve behavior.
+- `PlaybackController`: plays a resolved `Playable`, such as a URL, provider reference, or fake candidate.
+
+This keeps provider data access separate from playback control. NetEase can produce URL playables, Spotify can produce provider references and playback controls, and fake/local adapters can stay entirely local.
+
+The package includes a tiny `url-open` playback controller. It opens non-preview `http`/`https` playables with the OS default handler. It is intentionally minimal: no embedded decoder, no provider credentials, no playlist management, and no pause/next control. The experimental NetEase TUI path uses a native mini-player separately while the provider SPI evolves.
+
 Potential adapter targets:
 
 - local files
