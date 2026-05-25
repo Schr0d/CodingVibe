@@ -1,3 +1,8 @@
-AGPL-3.0-or-later for core daemon, CLI, policy engine, and sidecar code.
+Coding Vibe core daemon, CLI, policy engine, adapters, MCP server, and sidecar
+code are licensed under the GNU Affero General Public License v3.0 or later.
 
-Full license text to be added before distribution.
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+See: https://www.gnu.org/licenses/agpl-3.0.html
+
+Files covered by LICENSE.schemas are separately licensed under Apache-2.0.

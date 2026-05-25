@@ -1,3 +1,10 @@
-Schemas, examples, sample vibe packs, and fake adapter sample data are intended to be published under a permissive license such as MIT or Apache-2.0.
+Coding Vibe schemas, examples, sample vibe packs, and fake adapter sample data
+are licensed under the Apache License, Version 2.0.
 
-Final permissive license text to be added before distribution.
+SPDX-License-Identifier: Apache-2.0
+
+See: https://www.apache.org/licenses/LICENSE-2.0
+
+This permissive license is intended to let researchers, adapter authors, and
+tool builders reuse the workflow-state contract without adopting the AGPL core
+daemon license.
