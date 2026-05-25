@@ -17,6 +17,8 @@
   ],
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --sourcemap --clean",
+    "start": "node dist/cli.js start",
+    "setup:netease": "node dist/cli.js setup netease",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "tsx src/cli.ts"

@@ -63,6 +63,10 @@ export class NetEaseTuiAdapter {
     return this.current().candidate;
   }
 
+  async setVolume(volume: number): Promise<void> {
+    await this.player?.setVolume(volume);
+  }
+
   async logDecision(state: WorkflowState, decision: PolicyDecision, candidate: SafeCandidate): Promise<void> {
     const current = this.candidates.find((entry) => entry.candidate.id === candidate.id);
     const entry = {

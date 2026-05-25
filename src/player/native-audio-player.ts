@@ -50,6 +50,15 @@ export class NativeAudioPlayer {
     }
   }
 
+  async setVolume(volume: number): Promise<void> {
+    const clamped = Math.min(Math.max(volume, 0), 100);
+    if (process.platform === "win32") {
+      await this.ensureWindowsChild();
+      this.send(`volume ${clamped}`);
+      return;
+    }
+  }
+
   async destroy(): Promise<void> {
     if (this.windowsChild) {
       this.send("stop");
@@ -85,6 +94,9 @@ while (($line = [Console]::In.ReadLine()) -ne $null) {
     $player.Play()
   } elseif ($line -eq 'pause') {
     $player.Pause()
+  } elseif ($line.StartsWith('volume ')) {
+    $value = [double]$line.Substring(7)
+    $player.Volume = [Math]::Min([Math]::Max($value / 100.0, 0.0), 1.0)
   } elseif ($line -eq 'stop') {
     $player.Stop()
     break
