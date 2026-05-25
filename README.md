@@ -60,28 +60,49 @@ The trust boundary is the product: all adapter actions should be explainable fro
 ```bash
 npm install
 npm run build
-node dist/cli.js --help
+node dist/cli.js setup netease
+node dist/cli.js login netease
+node dist/cli.js start
+```
+
+That path is intentionally git-friendly: an AI agent can clone the repo, run `npm install`, build, set the provider, and start the daemon. `login netease` is the only human step because it opens a QR code for the NetEase mobile app.
+
+For a no-provider smoke test:
+
+```bash
+node dist/cli.js setup fake
+node dist/cli.js start
+```
+
+To verify schemas without starting playback:
+
+```bash
 node dist/cli.js validate examples/workflow-state.min.json
 ```
 
-Expected validation output:
-
-```text
-Valid workflow state: examples/workflow-state.min.json
-```
+Expected validation output: `Valid workflow state: examples/workflow-state.min.json`.
 
 Current commands:
 
 ```bash
 node dist/cli.js init
+node dist/cli.js setup netease
+node dist/cli.js login netease
+node dist/cli.js start
 node dist/cli.js dev --fake
 node dist/cli.js dev --netease --query "ambient focus instrumental"
+node dist/cli.js daemon
 node dist/cli.js state
 node dist/cli.js explain
 node dist/cli.js validate examples/workflow-state.min.json
 node dist/cli.js mcp
 node dist/cli.js spotify status
 node dist/cli.js netease capabilities
+node dist/cli.js provider get
+node dist/cli.js provider set netease
+node dist/cli.js provider query "lofi focus"
+node dist/cli.js provider next
+node dist/cli.js provider volume 80
 ```
 
 `node dist/cli.js mcp` starts a stdio MCP server with safe local tools:
@@ -89,6 +110,11 @@ node dist/cli.js netease capabilities
 - `get_workflow_state`: read the current safe workflow-state summary.
 - `explain_policy`: explain the latest local policy decision.
 - `list_available_vibes`: list supported workflow modes.
+- `get_music_provider`: read the selected local music provider.
+- `set_music_provider`: select `fake` or `netease` for local adapter processes without calling provider APIs.
+- `set_music_query`: set the local NetEase search query for adapter processes without calling provider APIs.
+- `next_track`: ask the local adapter daemon to switch to the next track without calling provider APIs through MCP.
+- `set_volume`: ask the local adapter daemon to set playback volume without calling provider APIs through MCP.
 - `set_vibe`: write a local workflow vibe and policy decision.
 - `set_fake_vibe`: deprecated compatibility alias for `set_vibe`.
 
@@ -130,6 +156,25 @@ During `dev --fake`:
 - `q`: quit.
 
 During `dev --netease`, the same compact TUI uses the local sample workflow-state watcher but plays NetEase Cloud Music URLs through a native player path. Windows uses `System.Windows.Media.MediaPlayer`; macOS downloads the URL to a temp file and uses `afplay`; Linux downloads the URL to a temp file and requires `ffplay`, `mpg123`, or `mpv`. This is experimental and opt-in.
+
+If no `dev` adapter flag is passed, `dev` uses `.vibe/provider-settings.json`. Agents can update that local setting through `set_music_provider`, but MCP still never calls provider APIs directly.
+
+For the normal ambient loop, run the daemon and leave it running:
+
+```bash
+node dist/cli.js provider set netease
+node dist/cli.js start
+```
+
+The daemon polls `.vibe/vibe-state.json` and `.vibe/provider-settings.json`, evaluates local policy, and drives the selected adapter. MCP remains a safe control plane: agents set workflow intent and provider selection, while the daemon owns playback side effects.
+
+Common playback controls:
+
+```bash
+node dist/cli.js provider query "lofi focus"
+node dist/cli.js provider next
+node dist/cli.js provider volume 100
+```
 
 ## Core Artifact
 

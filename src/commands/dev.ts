@@ -3,6 +3,7 @@ import { FakeAdapter } from "../adapters/fake-adapter.js";
 import { createNetEaseAdapterFromEnv } from "../adapters/netease-adapter.js";
 import { NetEaseTuiAdapter } from "../adapters/netease-tui-adapter.js";
 import { readJson, writeJson } from "../json.js";
+import { readActiveMusicProvider } from "../mcp/tools.js";
 import { ADAPTER_LOG_FILE, CANDIDATES_FILE, DECISION_FILE, POLICY_FILE, STATE_FILE, vibePath } from "../paths.js";
 import { evaluatePolicy } from "../policy/evaluate-policy.js";
 import { atomicWriteJson } from "../state/atomic-write.js";
@@ -33,18 +34,16 @@ type Settings = {
 };
 
 export async function devCommand(options: DevOptions): Promise<void> {
-  if (!options.fake && !options.netease) {
-    throw new Error("Choose an adapter: dev --fake or dev --netease.");
-  }
+  const selectedAdapter = await selectAdapter(options);
 
   await mkdir(vibePath(), { recursive: true });
 
   const policy = await readJson<PolicyFile>(vibePath(POLICY_FILE));
-  const adapter = await createDevAdapter(options);
+  const adapter = await createDevAdapter(selectedAdapter, options.query);
   let tick = 0;
   let view: View = "main";
   let selectedSetting = 0;
-  const settings: Settings = { adapter: options.netease ? "netease" : "fake", volume: "simulated", mode: "compact", privacy: "strict" };
+  const settings: Settings = { adapter: selectedAdapter, volume: "simulated", mode: "compact", privacy: "strict" };
   let runtime = await updateRuntime(tick, policy, adapter);
   render(runtime, adapter.isPlaying(), view, settings, selectedSetting);
 
@@ -85,9 +84,16 @@ export async function devCommand(options: DevOptions): Promise<void> {
   });
 }
 
-async function createDevAdapter(options: DevOptions): Promise<DevAdapter> {
-  if (options.netease) {
-    return new NetEaseTuiAdapter(createNetEaseAdapterFromEnv(), vibePath(ADAPTER_LOG_FILE), options.query);
+async function selectAdapter(options: DevOptions): Promise<"fake" | "netease"> {
+  if (options.fake && options.netease) throw new Error("Choose only one adapter: --fake or --netease.");
+  if (options.fake) return "fake";
+  if (options.netease) return "netease";
+  return readActiveMusicProvider();
+}
+
+async function createDevAdapter(selectedAdapter: "fake" | "netease", query: string | undefined): Promise<DevAdapter> {
+  if (selectedAdapter === "netease") {
+    return new NetEaseTuiAdapter(createNetEaseAdapterFromEnv(), vibePath(ADAPTER_LOG_FILE), query);
   }
 
   const candidates = await readJson<CandidateFile>(vibePath(CANDIDATES_FILE));

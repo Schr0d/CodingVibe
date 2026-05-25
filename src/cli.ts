@@ -8,6 +8,10 @@ import { stateCommand } from "./commands/state.js";
 import { explainCommand } from "./commands/explain.js";
 import { spotifyCommand } from "./commands/spotify.js";
 import { neteaseCommand } from "./commands/netease.js";
+import { providerCommand } from "./commands/provider.js";
+import { daemonCommand } from "./commands/daemon.js";
+import { setupCommand } from "./commands/setup.js";
+import { loginCommand } from "./commands/login.js";
 
 const program = new Command();
 
@@ -58,6 +62,41 @@ program
   });
 
 program
+  .command("setup")
+  .description("Initialize Coding Vibe and select a local provider.")
+  .argument("[provider]", "fake | netease", "fake")
+  .option("--query <text>", "NetEase search query", "ambient focus instrumental")
+  .action(async (provider: "fake" | "netease", options: { query?: string }) => {
+    await runCommand(() => setupCommand(provider, options));
+  });
+
+program
+  .command("login")
+  .description("Login to an experimental provider.")
+  .argument("<provider>", "netease")
+  .action(async (provider: "netease") => {
+    await runCommand(() => loginCommand(provider));
+  });
+
+program
+  .command("daemon")
+  .description("Run the background adapter daemon that consumes MCP workflow state.")
+  .option("--interval <ms>", "poll interval in milliseconds", "2000")
+  .option("--query <text>", "NetEase search query", "ambient focus instrumental")
+  .action(async (options: { interval?: string; query?: string }) => {
+    await runCommand(() => daemonCommand(options));
+  });
+
+program
+  .command("start")
+  .description("Start the local adapter daemon.")
+  .option("--interval <ms>", "poll interval in milliseconds", "2000")
+  .option("--query <text>", "NetEase fallback search query", "ambient focus instrumental")
+  .action(async (options: { interval?: string; query?: string }) => {
+    await runCommand(() => daemonCommand(options));
+  });
+
+program
   .command("state")
   .description("Print current workflow-state summary.")
   .action(async () => {
@@ -80,6 +119,15 @@ program
   .option("--limit <n>", "result count", "5")
   .action(async (action: "capabilities" | "search" | "url" | "play" | "seed" | "login-qr", options: { query?: string; id?: string; limit?: string }) => {
     await runCommand(() => neteaseCommand(action, options));
+  });
+
+program
+  .command("provider")
+  .description("Read or select the local music provider setting.")
+  .argument("<action>", "get | set | list | next | volume | query")
+  .argument("[value]", "provider name, volume 0-100, or search query")
+  .action(async (action: "get" | "set" | "list" | "next" | "volume" | "query", value: string | undefined) => {
+    await runCommand(() => providerCommand(action, value));
   });
 
 async function runCommand(command: () => Promise<void>): Promise<void> {

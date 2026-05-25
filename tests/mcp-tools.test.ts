@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import policy from "../examples/policy.default.json" with { type: "json" };
 import state from "../examples/workflow-state.full.json" with { type: "json" };
-import { explainPolicyText, getWorkflowStateText, listAvailableVibesText, setFakeVibe, setVibe } from "../src/mcp/tools.js";
+import { explainPolicyText, getMusicProviderText, getWorkflowStateText, listAvailableVibesText, requestNextTrack, requestVolume, setFakeVibe, setMusicProvider, setMusicQuery, setVibe } from "../src/mcp/tools.js";
 import { agentVibeGuidance } from "../src/mcp/agent-guidance.js";
 
 let originalCwd: string;
@@ -50,6 +50,27 @@ describe("MCP safe tools", () => {
     const text = await setFakeVibe("reviewing", "checking compatibility");
 
     expect(text).toContain("set vibe=reviewing");
+  });
+
+  it("sets the selected music provider without calling provider APIs", async () => {
+    const text = await setMusicProvider("netease");
+    const provider = await getMusicProviderText();
+
+    expect(text).toContain("set music_provider=netease");
+    expect(provider).toContain("active_provider=netease");
+  });
+
+  it("sets the NetEase query without calling provider APIs", async () => {
+    const text = await setMusicQuery("lofi focus", "cli");
+    const provider = await getMusicProviderText();
+
+    expect(text).toContain("music_query=lofi focus");
+    expect(provider).toContain("netease_query=lofi focus");
+  });
+
+  it("requests player commands through local command files", async () => {
+    expect(await requestNextTrack()).toContain("player_command=next");
+    expect(await requestVolume(80)).toContain("value=80");
   });
 
   it("documents safe agent vibe selection", () => {
