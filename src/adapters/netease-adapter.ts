@@ -37,7 +37,20 @@ type NetEaseUrl = {
   type?: string;
   time?: number;
   freeTrialInfo?: unknown;
-  freeTrialPrivilege?: unknown;
+  freeTrialPrivilege?: NetEaseTrialPrivilege;
+  freeTimeTrialPrivilege?: NetEaseTrialPrivilege;
+};
+
+type NetEaseTrialPrivilege = {
+  resConsumable?: boolean;
+  userConsumable?: boolean;
+};
+
+export type NetEasePreviewFields = {
+  time?: number;
+  freeTrialInfo?: unknown;
+  freeTrialPrivilege?: NetEaseTrialPrivilege;
+  freeTimeTrialPrivilege?: NetEaseTrialPrivilege;
 };
 
 export type NetEaseSearchResult = {
@@ -237,8 +250,17 @@ function isUrl(value: unknown): value is NetEaseUrl {
   return Boolean(value && typeof value === "object" && typeof (value as NetEaseUrl).id === "number" && "url" in value);
 }
 
-function isPreviewOnly(value: NetEaseUrl): boolean {
-  return Boolean(value.freeTrialInfo || value.freeTrialPrivilege || (typeof value.time === "number" && value.time > 0 && value.time <= 35000));
+export function isPreviewOnly(value: NetEasePreviewFields): boolean {
+  return Boolean(
+    value.freeTrialInfo ||
+      isConsumableTrial(value.freeTrialPrivilege) ||
+      isConsumableTrial(value.freeTimeTrialPrivilege) ||
+      (typeof value.time === "number" && value.time > 0 && value.time <= 35000)
+  );
+}
+
+function isConsumableTrial(value: NetEaseTrialPrivilege | undefined): boolean {
+  return Boolean(value?.resConsumable || value?.userConsumable);
 }
 
 function artistName(song: NetEaseSong): string {

@@ -1,8 +1,8 @@
 export const agentVibeGuidance = `You are connected to Coding Vibe, a local ambient workflow-state sidecar.
 
-Use Coding Vibe when the work phase changes. Prefer calling set_fake_vibe over explaining the vibe in chat.
+Use Coding Vibe when the work phase changes. Prefer calling set_vibe over explaining the vibe in chat.
 
-Call set_fake_vibe with:
+Call set_vibe with:
 - planning: reading requirements, making a plan, deciding scope.
 - debugging: repeated errors, failing tests, investigating a bug.
 - waiting_ci: tests, builds, installs, or CI are running and you are waiting.
@@ -15,7 +15,7 @@ Call set_fake_vibe with:
 Safety rules:
 - The reason must be short and derived from task phase only.
 - Do not include source code, raw logs, stack traces, file paths, secrets, tokens, URLs, private issue text, or user account data in the reason.
-- Do not call provider APIs. Coding Vibe V1 is fake/local only.
+- Do not call provider APIs through MCP. Coding Vibe MCP only accepts safe workflow intent; adapters such as fake or NetEase consume that state separately.
 - If unsure, call list_available_vibes first.
 - If the user manually asks for a vibe, honor that request unless it would leak sensitive context.
 

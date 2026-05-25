@@ -6,7 +6,7 @@ Local, inspectable workflow-state sidecar for coding agents.
 
 Coding Vibe watches safe development signals, reduces them into an auditable workflow-state document, and maps that state to ambient work intent. Music is an adapter, not the core product.
 
-V1 is CLI-first and fake-adapter only. It does not connect to real music providers, OAuth, cloud services, or LLMs.
+The core V1 path is CLI-first and fake-adapter first. It does not require real music providers, OAuth, cloud services, or LLMs. Experimental provider adapters exist behind explicit commands and are not part of the default onboarding path.
 
 ## Why
 
@@ -19,19 +19,21 @@ Coding Vibe tests whether a local, inspectable workflow-state sidecar can make t
 - Defines `workflow-state.schema.json` as the safe state contract.
 - Validates workflow-state JSON with a CLI command.
 - Ships example workflow states, policies, and fake candidates.
-- Keeps provider integrations out of V1.
-- Keeps MCP as a planned V1.1 surface, not the first implementation risk.
+- Runs a fake watcher, deterministic policy engine, fake adapter, and compact terminal UI.
+- Exposes a stdio MCP server for safe local workflow-state inspection and vibe control.
+- Keeps provider integrations isolated as experimental, opt-in commands.
 
 ## What V1 Does Not Do
 
-- No Spotify, Apple Music, YouTube Music, NetEase Cloud Music, or QQ Music integration.
-- No OAuth.
+- No default Spotify, Apple Music, YouTube Music, NetEase Cloud Music, or QQ Music onboarding.
+- No OAuth broker, token refresh, or OS keychain integration.
 - No LLM policy.
 - No cloud sync.
 - No source-code capture.
 - No prompt capture.
 - No terminal-output capture.
 - No browser-history capture.
+- No arbitrary provider API proxy through MCP.
 
 ## Architecture
 
@@ -73,6 +75,7 @@ Current commands:
 ```bash
 node dist/cli.js init
 node dist/cli.js dev --fake
+node dist/cli.js dev --netease --query "ambient focus instrumental"
 node dist/cli.js state
 node dist/cli.js explain
 node dist/cli.js validate examples/workflow-state.min.json
@@ -85,12 +88,13 @@ node dist/cli.js netease capabilities
 
 - `get_workflow_state`: read the current safe workflow-state summary.
 - `explain_policy`: explain the latest local policy decision.
-- `list_available_vibes`: list supported fake workflow modes.
-- `set_fake_vibe`: write a local fake vibe and policy decision.
+- `list_available_vibes`: list supported workflow modes.
+- `set_vibe`: write a local workflow vibe and policy decision.
+- `set_fake_vibe`: deprecated compatibility alias for `set_vibe`.
 
 The MCP server does not expose provider APIs, OAuth tokens, raw source code, raw logs, browser data, or arbitrary shell access.
 
-It also exposes the `coding_vibe_agent_guidance` prompt. Use it to tell a coding agent when to call `set_fake_vibe` with its existing large model, without running a second model inside Coding Vibe.
+It also exposes the `coding_vibe_agent_guidance` prompt. Use it to tell a coding agent when to call `set_vibe` with its existing large model, without running a second model inside Coding Vibe.
 
 Example MCP config:
 
@@ -107,7 +111,7 @@ Example MCP config:
 
 Agent behavior policy:
 
-- Call `set_fake_vibe` when the work phase changes.
+- Call `set_vibe` when the work phase changes.
 - Use `debugging` for repeated errors or failing tests.
 - Use `writing` for docs, README, changelog, or prose-heavy work.
 - Use `waiting_ci` while tests/builds/CI are running.
@@ -124,6 +128,8 @@ During `dev --fake`:
 - `e`: explain current policy decision.
 - `s`: print current workflow state JSON.
 - `q`: quit.
+
+During `dev --netease`, the same compact TUI uses the local sample workflow-state watcher but plays NetEase Cloud Music URLs through a native player path. Windows uses `System.Windows.Media.MediaPlayer`; macOS downloads the URL to a temp file and uses `afplay`; Linux downloads the URL to a temp file and requires `ffplay`, `mpg123`, or `mpv`. This is experimental and opt-in.
 
 ## Core Artifact
 
@@ -188,9 +194,9 @@ The first UI only needs current workflow state, current fake/local candidate, co
 
 ## Provider Plugins
 
-Provider integrations are future plugin/SPI work. Core owns the workflow-state schema, privacy rules, policy engine, and adapter contract. Provider-specific adapters should live outside core unless they are fake or local reference implementations.
+Provider integrations are experimental adapter work. Core owns the workflow-state schema, privacy rules, policy engine, and adapter contract. Provider-specific adapters should remain isolated unless they are fake or local reference implementations.
 
-Potential future adapters:
+Potential adapter targets:
 
 - local files
 - MPD
@@ -201,7 +207,7 @@ Potential future adapters:
 - NetEase Cloud Music
 - QQ Music
 
-Non-official adapters should be marked experimental and must declare their capabilities and privacy surface.
+Non-official adapters should be marked experimental and must declare their capabilities and privacy surface. They should not be default onboarding paths.
 
 ## Spotify Adapter
 

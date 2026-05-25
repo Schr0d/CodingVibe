@@ -4,7 +4,7 @@
 
 Build V1 as a TypeScript CLI-first local sidecar with a small TUI dashboard.
 
-Do not build OAuth, real music providers, LLM policy, cloud sync, or dynamic plugins in V1.
+Do not build OAuth, LLM policy, cloud sync, or dynamic plugins in V1. Keep real provider work experimental, opt-in, and outside the default product loop.
 
 The first shippable product is:
 
@@ -76,7 +76,7 @@ V1 settings are local-only and mostly toggles for the fake loop. No provider log
 Platform connection can appear later as a disabled status row:
 
 ```text
-Provider     none  V1 uses fake/local adapters only
+Provider     none  default loop uses fake adapter
 ```
 
 ## Technical Stack
@@ -139,21 +139,29 @@ Reason: simple TypeScript bundling without heavy config.
 
 ### MCP
 
-Do not implement MCP in the first implementation slice.
+MCP is implemented as a safe local surface, not a provider-control surface.
 
-Keep command placeholder:
+Current command:
 
 ```bash
 vibe mcp
 ```
 
-It should print:
+It starts a stdio MCP server with tools for local state inspection, policy explanation, listing supported workflow modes, and setting a workflow vibe.
+
+It must not expose:
 
 ```text
-MCP server is planned for V1.1. V1 exposes CLI state and fake adapter controls.
+provider APIs
+OAuth tokens
+cookies
+raw source code
+raw logs
+browser data
+arbitrary shell access
 ```
 
-Reason: the current risk is workflow-state usefulness and trust, not MCP plumbing.
+Reason: MCP is useful only if it reinforces the trust boundary. It lets an agent express ambient workflow intent without turning Coding Vibe into an arbitrary automation proxy.
 
 ## Repository Structure
 
@@ -447,7 +455,7 @@ Reason:
 - The first users are developers already in terminals.
 - It keeps the product local and inspectable.
 - It avoids browser UI, auth screens, and styling work.
-- It tests the core loop without real provider integration.
+- It tests the core loop without requiring real provider integration.
 
 The UI is intentionally small:
 
@@ -466,17 +474,18 @@ That is enough. Anything more belongs after V1 validation.
 - TUI key handling can be flaky on Windows terminals.
 - Fake watcher might feel too artificial unless sample events are realistic.
 - Users may ask for real provider connection before workflow-state value is proven.
+- Experimental provider adapters can blur the V1 trust story if they are presented as default product surface.
 - `vibe` package name may be unavailable.
 
 ## Open Questions
 
 - Final package name: `coding-vibe`.
-- Whether `local` adapter should ship in V1 or wait until fake loop is proven.
+- Whether `local` adapter should ship before external provider adapters become more prominent.
 - Whether to use `ink` after plain terminal prototype.
-- Whether to initialize a git repo before implementation.
+- Whether experimental Spotify and NetEase commands should move behind plugin/package boundaries before distribution.
 
 ## Next Action
 
 Start Slice 1 and Slice 2.
 
-Do not start provider plugins, OAuth, MCP server implementation, or LLM selection until the CLI/TUI fake loop is working and validated.
+Do not start OAuth, broad provider plugins, or LLM selection until the CLI/TUI fake loop is validated. Keep the existing MCP server limited to safe local state tools, and keep existing Spotify/NetEase commands clearly labeled experimental.

@@ -41,7 +41,7 @@ export function listAvailableVibesText(): string {
   return availableVibes.join("\n");
 }
 
-export async function setFakeVibe(vibe: WorkflowMode, reason?: string): Promise<string> {
+export async function setVibe(vibe: WorkflowMode, reason?: string): Promise<string> {
   if (!availableVibes.includes(vibe)) {
     throw new Error(`Unsupported vibe: ${vibe}`);
   }
@@ -58,7 +58,7 @@ export async function setFakeVibe(vibe: WorkflowMode, reason?: string): Promise<
       phase: "mcp_set_vibe",
       momentum: "unknown",
       confidence: 1,
-      signals: [reason ? `mcp reason: ${sanitizeReason(reason)}` : "mcp set_fake_vibe"]
+      signals: [reason ? `mcp reason: ${sanitizeReason(reason)}` : "mcp set_vibe"]
     },
     safety: {
       redactions_applied: reason ? ["reason_truncated"] : [],
@@ -71,6 +71,10 @@ export async function setFakeVibe(vibe: WorkflowMode, reason?: string): Promise<
   await writeJson(vibePath(DECISION_FILE), decision);
 
   return `set vibe=${vibe}\nmatched_rule=${decision.matched_rule_id}\nreason=${decision.reason}`;
+}
+
+export async function setFakeVibe(vibe: WorkflowMode, reason?: string): Promise<string> {
+  return setVibe(vibe, reason);
 }
 
 function sanitizeReason(reason: string): string {

@@ -51,7 +51,9 @@ program
   .command("dev")
   .description("Run fake watcher, policy engine, adapter, and compact TUI.")
   .option("--fake", "use the fake adapter")
-  .action(async (options: { fake?: boolean }) => {
+  .option("--netease", "use the experimental NetEase adapter")
+  .option("--query <text>", "NetEase search query for dev --netease", "ambient focus instrumental")
+  .action(async (options: { fake?: boolean; netease?: boolean; query?: string }) => {
     await runCommand(() => devCommand(options));
   });
 
