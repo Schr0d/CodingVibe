@@ -361,6 +361,6 @@ npm run build
 
 ## License
 
-Core daemon, CLI, policy engine, and sidecar code: `AGPL-3.0-or-later`.
+Core daemon, CLI, policy engine, adapters, MCP server, and sidecar code: `AGPL-3.0-or-later`.
 
-Schemas, examples, sample vibe packs, and fake adapter sample data are intended to use a permissive license before distribution.
+Schemas, examples, sample vibe packs, and fake adapter sample data: `Apache-2.0` via `LICENSE.schemas`.
