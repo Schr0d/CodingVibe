@@ -51,7 +51,9 @@ program
   .command("dev")
   .description("Run fake watcher, policy engine, adapter, and compact TUI.")
   .option("--fake", "use the fake adapter")
-  .action(async (options: { fake?: boolean }) => {
+  .option("--netease", "use the experimental NetEase adapter")
+  .option("--query <text>", "NetEase search query for dev --netease", "ambient focus instrumental")
+  .action(async (options: { fake?: boolean; netease?: boolean; query?: string }) => {
     await runCommand(() => devCommand(options));
   });
 
@@ -72,11 +74,11 @@ program
 program
   .command("netease")
   .description("Use the experimental NetEase Cloud Music adapter. Unofficial API; no cookies are persisted.")
-  .argument("<action>", "capabilities | search | url | play | seed")
+  .argument("<action>", "capabilities | search | url | play | seed | login-qr")
   .option("--query <text>", "search query")
   .option("--id <id>", "song id for url")
   .option("--limit <n>", "result count", "5")
-  .action(async (action: "capabilities" | "search" | "url" | "play" | "seed", options: { query?: string; id?: string; limit?: string }) => {
+  .action(async (action: "capabilities" | "search" | "url" | "play" | "seed" | "login-qr", options: { query?: string; id?: string; limit?: string }) => {
     await runCommand(() => neteaseCommand(action, options));
   });
 

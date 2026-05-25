@@ -1,5 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { FakeAdapter } from "../adapters/fake-adapter.js";
+import { createNetEaseAdapterFromEnv } from "../adapters/netease-adapter.js";
+import { NetEaseTuiAdapter } from "../adapters/netease-tui-adapter.js";
 import { readJson, writeJson } from "../json.js";
 import { ADAPTER_LOG_FILE, CANDIDATES_FILE, DECISION_FILE, POLICY_FILE, STATE_FILE, vibePath } from "../paths.js";
 import { evaluatePolicy } from "../policy/evaluate-policy.js";
@@ -9,7 +11,11 @@ import { createFakeState } from "../watcher/fake-watcher.js";
 
 type DevOptions = {
   fake?: boolean;
+  netease?: boolean;
+  query?: string;
 };
+
+type DevAdapter = FakeAdapter | NetEaseTuiAdapter;
 
 type DevRuntime = {
   state: WorkflowState;
@@ -20,26 +26,25 @@ type DevRuntime = {
 type View = "main" | "settings";
 
 type Settings = {
-  adapter: "fake";
+  adapter: "fake" | "netease";
   volume: "simulated" | "muted";
   mode: "compact" | "expanded";
   privacy: "strict" | "inspect";
 };
 
 export async function devCommand(options: DevOptions): Promise<void> {
-  if (!options.fake) {
-    throw new Error("V1 only supports dev --fake.");
+  if (!options.fake && !options.netease) {
+    throw new Error("Choose an adapter: dev --fake or dev --netease.");
   }
 
   await mkdir(vibePath(), { recursive: true });
 
   const policy = await readJson<PolicyFile>(vibePath(POLICY_FILE));
-  const candidates = await readJson<CandidateFile>(vibePath(CANDIDATES_FILE));
-  const adapter = new FakeAdapter(candidates, vibePath(ADAPTER_LOG_FILE));
+  const adapter = await createDevAdapter(options);
   let tick = 0;
   let view: View = "main";
   let selectedSetting = 0;
-  const settings: Settings = { adapter: "fake", volume: "simulated", mode: "compact", privacy: "strict" };
+  const settings: Settings = { adapter: options.netease ? "netease" : "fake", volume: "simulated", mode: "compact", privacy: "strict" };
   let runtime = await updateRuntime(tick, policy, adapter);
   render(runtime, adapter.isPlaying(), view, settings, selectedSetting);
 
@@ -56,6 +61,7 @@ export async function devCommand(options: DevOptions): Promise<void> {
   process.stdin.on("data", async (key) => {
     if (key === "q" || key === "\u0003") {
       clearInterval(interval);
+      await adapter.destroy?.();
       process.stdin.setRawMode?.(false);
       process.stdout.write("\n");
       process.exit(0);
@@ -68,8 +74,8 @@ export async function devCommand(options: DevOptions): Promise<void> {
       if (key === "\u001b[B" || key === "j") selectedSetting = Math.min(3, selectedSetting + 1);
       if (key === "\r" || key === " ") toggleSetting(settings, selectedSetting);
     } else {
-      if (key === " ") adapter.togglePlay();
-      if (key === "n") runtime.candidate = adapter.next(runtime.state);
+      if (key === " ") await adapter.togglePlay(runtime.state);
+      if (key === "n") runtime.candidate = await adapter.next(runtime.state);
       if (key === "e") renderExplain(runtime);
       if (key === "s") renderState(runtime.state);
     }
@@ -79,10 +85,19 @@ export async function devCommand(options: DevOptions): Promise<void> {
   });
 }
 
-async function updateRuntime(tick: number, policy: PolicyFile, adapter: FakeAdapter): Promise<DevRuntime> {
+async function createDevAdapter(options: DevOptions): Promise<DevAdapter> {
+  if (options.netease) {
+    return new NetEaseTuiAdapter(createNetEaseAdapterFromEnv(), vibePath(ADAPTER_LOG_FILE), options.query);
+  }
+
+  const candidates = await readJson<CandidateFile>(vibePath(CANDIDATES_FILE));
+  return new FakeAdapter(candidates, vibePath(ADAPTER_LOG_FILE));
+}
+
+async function updateRuntime(tick: number, policy: PolicyFile, adapter: DevAdapter): Promise<DevRuntime> {
   const state = createFakeState(tick);
   const decision = evaluatePolicy(policy, state);
-  const candidate = adapter.currentCandidate(state);
+  const candidate = await adapter.currentCandidate(state);
   await atomicWriteJson(vibePath(STATE_FILE), state);
   await writeJson(vibePath(DECISION_FILE), decision);
   await adapter.logDecision(state, decision, candidate);
@@ -96,13 +111,13 @@ function render(runtime: DevRuntime, playing: boolean, view: View, settings: Set
   }
 
   const state = runtime.state.workflow;
-  const playState = playing ? "playing" : "paused";
-  const line1 = `${state.mode}  ${state.confidence.toFixed(2)}  ${state.momentum ?? "unknown"}  fake:${playState}`;
+  const playState = playing ? "play" : "pause";
+  const line1 = `${state.mode}  ${state.confidence.toFixed(2)}  ${state.momentum ?? "unknown"}  ${settings.adapter}:${playState}`;
   const line2 = `now ${runtime.decision.adapter_action.mood}  ${runtime.candidate.id}`;
   process.stdout.write("\x1Bc");
   process.stdout.write(`┌─ Vibe ─────────────────────────────────┐\n`);
   process.stdout.write(`│ ${pad("/\\  workflow-state sidecar", 38)} │\n`);
-  process.stdout.write(`│ ${pad("\\/  no oauth · fake adapter", 38)} │\n`);
+  process.stdout.write(`│ ${pad(`\\/  no oauth · ${settings.adapter} adapter`, 38)} │\n`);
   process.stdout.write(`├────────────────────────────────────────┤\n`);
   process.stdout.write(`│ ${pad(line1, 38)} │\n`);
   process.stdout.write(`│ ${pad(line2, 38)} │\n`);

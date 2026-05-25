@@ -30,6 +30,8 @@ export class FakeAdapter {
     return this.currentCandidate(state);
   }
 
+  async destroy(): Promise<void> {}
+
   async logDecision(state: WorkflowState, decision: PolicyDecision, candidate: SafeCandidate): Promise<void> {
     const entry = {
       ts: new Date().toISOString(),

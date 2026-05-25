@@ -31,7 +31,7 @@ V1 tests whether a local, inspectable workflow-state sidecar is useful enough to
 - No Spotify OAuth.
 - No Apple Music integration.
 - No YouTube Music integration.
-- No real music provider adapters.
+- No default real music provider onboarding.
 - No arbitrary provider API proxy.
 - No LLM inference.
 - No cloud sync.
@@ -124,7 +124,7 @@ Fake Adapter
 adapter-log.jsonl / CLI output
 ```
 
-V1 intentionally excludes OAuth, real provider integrations, LLM inference, cloud sync, and hidden capture of prompts, source code, terminal output, browser state, or editor buffers.
+V1 intentionally excludes OAuth, default provider onboarding, LLM inference, cloud sync, and hidden capture of prompts, source code, terminal output, browser state, or editor buffers. Experimental provider adapters may exist only behind explicit commands and must not weaken the core trust boundary.
 
 The fake adapter is not a placeholder. It is the validation surface for proving whether workflow-state is useful, understandable, safe, and controllable before any external integration exists.
 
@@ -336,7 +336,7 @@ execute_provider_request(raw_request)
 
 The model expresses intent. The broker executes provider-specific actions.
 
-V1 MCP should be read-only for state and policy inspection, plus fake-adapter control only. It must have no external side effects.
+V1 MCP is read-only for state and policy inspection, plus fake-adapter control only. It must have no external provider side effects.
 
 ## Agent Song Selection Boundary
 
@@ -460,7 +460,7 @@ V1 target platforms:
 - Linux: supported.
 - Windows: supported only if file paths, atomic rename, and watcher behavior are tested in CI.
 
-No native provider integrations ship in V1.
+Native provider integrations are not part of default V1 onboarding. Experimental provider commands may ship only if they are clearly isolated, opt-in, and documented with their privacy surface.
 
 ## Developer Experience
 
@@ -591,7 +591,7 @@ Success criteria:
 - Median time to first policy edit: under 7 minutes.
 - At least 7/10 understand what data is and is not captured.
 - At least 6/10 say the inspectability makes the ambient behavior trustworthy.
-- Zero testers believe V1 connects to real music providers.
+- Zero testers believe V1 requires real music providers or connects to them by default.
 
 ## Roadmap
 
@@ -608,6 +608,8 @@ Success criteria:
 - Privacy audit command.
 - CLI quick start.
 - MCP inspection server.
+
+Experimental provider commands can exist after the core loop, but they are not required for V1 validation and must remain off the default path.
 
 ### V2: Chosen From Validation
 
@@ -660,7 +662,7 @@ Reference providers:
 - `fake`: validates policy and workflow-state without external side effects.
 - `local`: plays local files or user-provided playlists without OAuth.
 
-Future external plugins:
+External or experimental plugins:
 
 - `spotify`
 - `apple_music`
@@ -698,7 +700,7 @@ That restraint is the product.
 Auto-decisions applied:
 
 - Preserve AGPL core plus permissive schemas/examples.
-- Preserve no OAuth, no provider integration, no LLM in V1.
+- Preserve no OAuth, no default provider integration, no LLM in V1.
 - Make `workflow-state.schema.json` a first-class artifact.
 - Use explicit sample/fake watcher input before real ambient capture.
 - Use ordered first-match policy semantics with explain output.

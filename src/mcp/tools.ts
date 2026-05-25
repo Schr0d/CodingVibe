@@ -73,6 +73,10 @@ export async function setVibe(vibe: WorkflowMode, reason?: string): Promise<stri
   return `set vibe=${vibe}\nmatched_rule=${decision.matched_rule_id}\nreason=${decision.reason}`;
 }
 
+export async function setFakeVibe(vibe: WorkflowMode, reason?: string): Promise<string> {
+  return setVibe(vibe, reason);
+}
+
 function sanitizeReason(reason: string): string {
   return reason.replace(/[\r\n\t]+/g, " ").slice(0, 120);
 }

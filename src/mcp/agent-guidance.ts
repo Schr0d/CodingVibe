@@ -15,7 +15,7 @@ Call set_vibe with:
 Safety rules:
 - The reason must be short and derived from task phase only.
 - Do not include source code, raw logs, stack traces, file paths, secrets, tokens, URLs, private issue text, or user account data in the reason.
-- Do not call provider APIs. Coding Vibe V1 is fake/local only.
+- Do not call provider APIs through MCP. Coding Vibe MCP only accepts safe workflow intent; adapters such as fake or NetEase consume that state separately.
 - If unsure, call list_available_vibes first.
 - If the user manually asks for a vibe, honor that request unless it would leak sensitive context.
 
